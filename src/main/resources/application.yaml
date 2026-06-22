@@ -1,0 +1,23 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5436/newsletter_db
+    username: ${DB_USERNAME:user}
+    password: ${DB_PASSWORD:pass}
+
+  liquibase:
+    enabled: false
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+    # Hibernate ddl auto (create, create-drop, validate, update)
+    hibernate:
+      ddl-auto: update
+
+
