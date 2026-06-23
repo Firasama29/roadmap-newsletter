@@ -6,12 +6,12 @@ import com.roadmap.newsletter.model.TopicRequest;
 import com.roadmap.newsletter.model.TopicResponse;
 import com.roadmap.newsletter.repository.TopicRepository;
 import lombok.AllArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
@@ -22,9 +22,7 @@ public class TopicService {
     // add topic
     public TopicResponse addTopic(TopicRequest topicRequest) {
         TopicResponse topicResponse = new TopicResponse();
-        List<Topic> topics = topicRepository.findAll().stream()
-          .filter(topic -> topic.getName().contains(topicRequest.getName()))
-          .toList();
+        List<Topic> topics = topicRepository.findByNameContaining(topicRequest.getName());
         if (topics.isEmpty()) {
             Topic topic = new Topic();
             topic.setName(topicRequest.getName());
@@ -41,15 +39,15 @@ public class TopicService {
     public TopicResponse getTopics() {
         TopicResponse topicResponse = new TopicResponse();
         List<TopicData> topicDataList = new ArrayList<>();
-        TopicData topicData = new TopicData();
         List<Topic> topics = topicRepository.findAll();
         if (topics.isEmpty()) {
             topicResponse.setMessage("No records found");
             return topicResponse;
         }
         topics.forEach(topic -> {
-              topicData.setName(topic.getName());
-              topicData.setCategory(topic.getCategory());
+            TopicData topicData = new TopicData();
+            topicData.setName(topic.getName());
+            topicData.setCategory(topic.getCategory());
             topicDataList.add(topicData);
           });
         topicResponse.setData(topicDataList);
@@ -59,27 +57,24 @@ public class TopicService {
 
     // list filtered topics by name
     public TopicResponse filterTopicsByName(String name) {
-        List<Topic> filteredTopics = topicRepository.findAll().stream()
-          .filter(topic -> topic.getName().contains(name))
-          .toList();
+        List<Topic> filteredTopics = topicRepository.findByNameContaining(name);
         return mapTopicResponse(filteredTopics);
     }
 
     public TopicResponse filterTopicsByCategory(String category) {
-        List<Topic> filteredTopics = topicRepository.findAll().stream()
-          .filter(topic -> topic.getCategory().contains(category))
-          .toList();
+        List<Topic> filteredTopics = topicRepository.findByCategoryContaining(category);
         return mapTopicResponse(filteredTopics);
     }
 
     private TopicResponse mapTopicResponse(List<Topic> filteredTopics) {
         TopicResponse response = new TopicResponse();
         List<TopicData> topicDataList = new ArrayList<>();
-        TopicData data = new TopicData();
         if (filteredTopics.isEmpty()) {
+            response.setMessage("No records found");
             return response;
         } else {
             filteredTopics.forEach(topic -> {
+                TopicData data = new TopicData();
                 data.setName(topic.getName());
                 data.setCategory(topic.getCategory());
                 topicDataList.add(data);
@@ -92,8 +87,8 @@ public class TopicService {
     // update topic details
     public TopicResponse modifyTopic(Long id, TopicRequest request) {
         Topic topic = topicRepository.findById(id).orElseThrow(() -> new ServiceException("No Topic found"));
-        topic.setName(StringUtils.isNotBlank(request.getName()) ? request.getName() : null);
-        topic.setCategory(StringUtils.isNotBlank(request.getCategory()) ? request.getCategory() : null);
+        topic.setName(Objects.nonNull(request.getName()) ? request.getName() : topic.getName());
+        topic.setCategory(Objects.nonNull(request.getCategory()) ? request.getCategory() : topic.getCategory());
         topicRepository.save(topic);
 
         TopicResponse response = new TopicResponse();
