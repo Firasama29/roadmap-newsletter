@@ -7,10 +7,9 @@ import java.util.List;
 
 @Getter
 @Setter
-public class TopicData {
-  private String name;
+public class ArticleResponse {
 
-  private String category;
+    private String message;
 
-  private List<Articles> articles;
+    private List<ArticleData> data;
 }
