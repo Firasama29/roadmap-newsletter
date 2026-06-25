@@ -1,6 +1,8 @@
 package com.roadmap.newsletter.service;
 
+import com.roadmap.newsletter.entity.Article;
 import com.roadmap.newsletter.entity.Topic;
+import com.roadmap.newsletter.model.Articles;
 import com.roadmap.newsletter.model.TopicData;
 import com.roadmap.newsletter.model.TopicRequest;
 import com.roadmap.newsletter.model.TopicResponse;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 @Service
 @AllArgsConstructor
@@ -22,7 +25,7 @@ public class TopicService {
     // add topic
     public TopicResponse addTopic(TopicRequest topicRequest) {
         TopicResponse topicResponse = new TopicResponse();
-        List<Topic> topics = topicRepository.findByNameContaining(topicRequest.getName());
+        Optional<Topic> topics = topicRepository.findByNameContaining(topicRequest.getName());
         if (topics.isEmpty()) {
             Topic topic = new Topic();
             topic.setName(topicRequest.getName());
@@ -31,7 +34,7 @@ public class TopicService {
             topicResponse.setMessage("New topic saved successfully");
             return topicResponse;
         } else {
-            throw new ServiceException("Topic already exists!");
+            throw new ServiceException("Topic already exists.");
         }
     }
 
@@ -48,6 +51,7 @@ public class TopicService {
             TopicData topicData = new TopicData();
             topicData.setName(topic.getName());
             topicData.setCategory(topic.getCategory());
+            topicData.setArticles(mapArticles(topic.getArticles()));
             topicDataList.add(topicData);
           });
         topicResponse.setData(topicDataList);
@@ -57,28 +61,26 @@ public class TopicService {
 
     // list filtered topics by name
     public TopicResponse filterTopicsByName(String name) {
-        List<Topic> filteredTopics = topicRepository.findByNameContaining(name);
-        return mapTopicResponse(filteredTopics);
+        Optional<Topic> filteredTopic = topicRepository.findByNameContaining(name);
+        return mapTopicResponse(filteredTopic.get());
     }
 
     public TopicResponse filterTopicsByCategory(String category) {
-        List<Topic> filteredTopics = topicRepository.findByCategoryContaining(category);
-        return mapTopicResponse(filteredTopics);
+        Optional<Topic> filteredTopic = topicRepository.findByCategoryContaining(category);
+        return mapTopicResponse(filteredTopic.get());
     }
 
-    private TopicResponse mapTopicResponse(List<Topic> filteredTopics) {
+    private TopicResponse mapTopicResponse(Topic filteredTopic) {
         TopicResponse response = new TopicResponse();
         List<TopicData> topicDataList = new ArrayList<>();
-        if (filteredTopics.isEmpty()) {
+        if (Objects.isNull(filteredTopic)) {
             response.setMessage("No records found");
             return response;
         } else {
-            filteredTopics.forEach(topic -> {
-                TopicData data = new TopicData();
-                data.setName(topic.getName());
-                data.setCategory(topic.getCategory());
-                topicDataList.add(data);
-            });
+            TopicData data = new TopicData();
+            data.setName(filteredTopic.getName());
+            data.setCategory(filteredTopic.getCategory());
+            topicDataList.add(data);
             response.setData(topicDataList);
         }
         return response;
@@ -110,5 +112,17 @@ public class TopicService {
 
         response.setMessage("Topic deleted successfully.");
         return  response;
+    }
+
+    private List<Articles> mapArticles(List<Article> articleList) {
+        List<Articles> articles = new ArrayList<>();
+        for (Article articleEntity : articleList) {
+            Articles article = new Articles();
+            article.setTitle(articleEntity.getTitle());
+            article.setDescription(articleEntity.getDescription());
+            article.setLink(articleEntity.getLink());
+            articles.add(article);
+        }
+        return articles;
     }
 }
