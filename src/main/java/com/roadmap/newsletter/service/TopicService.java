@@ -25,7 +25,7 @@ public class TopicService {
     // add topic
     public TopicResponse addTopic(TopicRequest topicRequest) {
         TopicResponse topicResponse = new TopicResponse();
-        Optional<Topic> topics = topicRepository.findByNameContaining(topicRequest.getName());
+        Optional<Topic> topics = topicRepository.findByName(topicRequest.getName());
         if (topics.isEmpty()) {
             Topic topic = new Topic();
             topic.setName(topicRequest.getName());
@@ -61,7 +61,7 @@ public class TopicService {
 
     // list filtered topics by name
     public TopicResponse filterTopicsByName(String name) {
-        Optional<Topic> filteredTopic = topicRepository.findByNameContaining(name);
+        Optional<Topic> filteredTopic = topicRepository.findByName(name);
         return mapTopicResponse(filteredTopic.get());
     }
 
@@ -119,7 +119,8 @@ public class TopicService {
         for (Article articleEntity : articleList) {
             Articles article = new Articles();
             article.setTitle(articleEntity.getTitle());
-            article.setDescription(articleEntity.getDescription());
+            article.setExcerpt(articleEntity.getExcerpt());
+            article.setSource(articleEntity.getSource());
             article.setLink(articleEntity.getLink());
             articles.add(article);
         }

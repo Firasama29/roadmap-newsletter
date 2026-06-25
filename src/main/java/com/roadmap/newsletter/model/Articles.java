@@ -8,6 +8,7 @@ import lombok.Setter;
 public class Articles {
 
     private String title;
-    private String description;
     private String link;
+    private String excerpt;
+    private String source;
 }

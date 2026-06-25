@@ -14,13 +14,16 @@ public class ArticleRequest {
   @NotBlank(message = "Title is required")
   private String title;
 
-  private String description;
+  private String excerpt;
 
   @NotBlank(message = "Topic is required")
   private String topic;
 
   @NotBlank(message = "Category is required")
   private String category;
+
+  @NotBlank(message = "source name is required")
+  private String source;
 
   @NotBlank(message = "URL is required")
   @URL(message = "Invalid URL")

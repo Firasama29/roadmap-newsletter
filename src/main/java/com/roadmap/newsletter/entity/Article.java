@@ -32,8 +32,11 @@ public class Article {
   @JoinColumn(name = "topic_id")
   private Topic topic;
 
-  @Column(name = "description")
-  private String description;
+  @Column(name = "excerpt")
+  private String excerpt;
+
+  @Column(name = "source")
+  private String source;
 
   @Column(name = "link")
   private String link;

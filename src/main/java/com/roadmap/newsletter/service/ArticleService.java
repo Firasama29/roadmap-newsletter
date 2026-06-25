@@ -26,8 +26,8 @@ public class ArticleService {
 
     // add article
     public ArticleResponse addArticle(ArticleRequest request) {
-        Optional<Topic> topicEntity = topicRepository.findByNameContaining(request.getTopic());
-        Optional<Article> article = articleRepository.findByTitleContaining(request.getTitle());
+        Optional<Topic> topicEntity = topicRepository.findByName(request.getTopic());
+        Optional<Article> article = articleRepository.findByTitle(request.getTopic());
         if (article.isPresent()) {
             throw new ServiceException("Article already exist");
         }
@@ -43,7 +43,8 @@ public class ArticleService {
             topicRepository.save(newTopic);
         }
         newArticle.setTitle(request.getTitle());
-        newArticle.setDescription(request.getDescription());
+        newArticle.setExcerpt(request.getExcerpt());
+        newArticle.setSource(request.getSource());
         newArticle.setLink(request.getLink());
         // now saving the article
         articleRepository.save(newArticle);
