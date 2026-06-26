@@ -1,7 +1,7 @@
 package com.roadmap.newsletter.controller;
 
-import com.roadmap.newsletter.model.TopicRequest;
-import com.roadmap.newsletter.model.TopicResponse;
+import com.roadmap.newsletter.model.topic.TopicRequest;
+import com.roadmap.newsletter.model.topic.TopicResponse;
 import com.roadmap.newsletter.service.TopicService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;

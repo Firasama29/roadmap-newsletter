@@ -2,10 +2,10 @@ package com.roadmap.newsletter.service;
 
 import com.roadmap.newsletter.entity.Article;
 import com.roadmap.newsletter.entity.Topic;
-import com.roadmap.newsletter.model.Articles;
-import com.roadmap.newsletter.model.TopicData;
-import com.roadmap.newsletter.model.TopicRequest;
-import com.roadmap.newsletter.model.TopicResponse;
+import com.roadmap.newsletter.model.article.Articles;
+import com.roadmap.newsletter.model.topic.TopicData;
+import com.roadmap.newsletter.model.topic.TopicRequest;
+import com.roadmap.newsletter.model.topic.TopicResponse;
 import com.roadmap.newsletter.repository.TopicRepository;
 import lombok.AllArgsConstructor;
 import org.hibernate.service.spi.ServiceException;
