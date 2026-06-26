@@ -2,9 +2,9 @@ package com.roadmap.newsletter.service;
 
 import com.roadmap.newsletter.entity.Article;
 import com.roadmap.newsletter.entity.Topic;
-import com.roadmap.newsletter.model.ArticleData;
-import com.roadmap.newsletter.model.ArticleRequest;
-import com.roadmap.newsletter.model.ArticleResponse;
+import com.roadmap.newsletter.model.article.ArticleData;
+import com.roadmap.newsletter.model.article.ArticleRequest;
+import com.roadmap.newsletter.model.article.ArticleResponse;
 import com.roadmap.newsletter.repository.ArticleRepository;
 import com.roadmap.newsletter.repository.TopicRepository;
 import lombok.AllArgsConstructor;

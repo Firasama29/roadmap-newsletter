@@ -1,4 +1,4 @@
-package com.roadmap.newsletter.model;
+package com.roadmap.newsletter.model.article;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;

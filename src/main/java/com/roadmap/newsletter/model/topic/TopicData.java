@@ -1,5 +1,6 @@
-package com.roadmap.newsletter.model;
+package com.roadmap.newsletter.model.topic;
 
+import com.roadmap.newsletter.model.article.Articles;
 import lombok.Getter;
 import lombok.Setter;
 

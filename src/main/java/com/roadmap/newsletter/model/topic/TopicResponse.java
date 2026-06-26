@@ -1,4 +1,4 @@
-package com.roadmap.newsletter.model;
+package com.roadmap.newsletter.model.topic;
 
 import lombok.Getter;
 import lombok.Setter;
