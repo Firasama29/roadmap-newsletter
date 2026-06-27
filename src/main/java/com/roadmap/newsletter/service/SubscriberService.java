@@ -2,6 +2,7 @@ package com.roadmap.newsletter.service;
 
 import com.roadmap.newsletter.entity.Subscriber;
 import com.roadmap.newsletter.entity.Topic;
+import com.roadmap.newsletter.model.SubscriptionObj;
 import com.roadmap.newsletter.model.subscriber.SubscriberRequest;
 import com.roadmap.newsletter.model.subscriber.SubscriberResponse;
 import com.roadmap.newsletter.model.subscriber.UserSignupEvent;
@@ -11,6 +12,7 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -65,7 +67,8 @@ public class SubscriberService {
         List<TopicData> selectedTopics = new ArrayList<>();
         topics.forEach(topic -> {
             // select a topic and add to empty list
-            if (subscriberRequest.getTopics().contains(topic.getName())) {
+            if (subscriberRequest.getSubscriptions().stream()
+              .anyMatch(sub -> StringUtils.equals(sub.getTopic(), topic.getName()))) {
                 selectedTopics.add(topic);
                 log.info("subscriber selected: {}", topic.getName());
             }
@@ -75,7 +78,7 @@ public class SubscriberService {
         List<String> filteredTopics = !selectedTopics.isEmpty() ? selectedTopics.stream().map(TopicData::getName).toList() : new ArrayList<>();
         //store subscriber details in subscriptions
         if(Objects.isNull(subscriber.getTopics()) || subscriber.getTopics().isEmpty()) {
-            subscriber.setTopics(subscriberRequest.getTopics());
+            subscriber.setTopics(mapNewTopics(subscriberRequest.getSubscriptions()));
         } else {
             subscriber.getTopics().addAll(filteredTopics);
         }
@@ -85,7 +88,15 @@ public class SubscriberService {
         SubscriberResponse response = new SubscriberResponse();
         response.setMessage("Subscription is ready.");
         response.setTopics(filteredTopics);
+
+        //TODO set 'subscribed' email event here
         return response;
+    }
+
+    private List<String> mapNewTopics(List<SubscriptionObj> subs) {
+        return subs.stream()
+          .map(SubscriptionObj::getTopic)
+          .toList();
     }
 
     private void saveSubscriberDetails(SubscriberRequest subscriberRequest) {
