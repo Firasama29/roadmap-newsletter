@@ -4,12 +4,18 @@ import com.roadmap.newsletter.entity.Subscriber;
 import com.roadmap.newsletter.entity.Topic;
 import com.roadmap.newsletter.model.subscriber.SubscriberRequest;
 import com.roadmap.newsletter.model.subscriber.SubscriberResponse;
+import com.roadmap.newsletter.model.subscriber.UserSignupEvent;
 import com.roadmap.newsletter.model.topic.TopicData;
 import com.roadmap.newsletter.repository.SubscriberRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.hibernate.service.spi.ServiceException;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,6 +31,8 @@ public class SubscriberService {
 
     private SubscriberRepository subscriberRepository;
     private TopicService topicService;
+    private ApplicationEventPublisher publisher;
+    private JavaMailSender mailSender;
 
     public SubscriberResponse signup(SubscriberRequest subscriberRequest) {
         // will add simple logic
@@ -35,7 +43,18 @@ public class SubscriberService {
         saveSubscriberDetails(subscriberRequest);
         SubscriberResponse response = new SubscriberResponse();
         response.setMessage("Signup successful");
+        publisher.publishEvent(new UserSignupEvent(subscriberRequest.getEmail()));
         return response;
+    }
+
+    @EventListener
+    public void sendWelcomeEmail(UserSignupEvent event) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(message, "UTF-8");
+        String html = "<h1>Welcome to Roadmap Newsletter</h1>";
+        mimeMessageHelper.setTo("firasdev29@gmail.com");
+        message.setText(html);
+        mailSender.send(message);
     }
 
     public SubscriberResponse addNewTopic(SubscriberRequest subscriberRequest) {

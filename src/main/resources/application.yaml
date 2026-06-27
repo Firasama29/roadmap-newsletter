@@ -10,6 +10,18 @@ spring:
     username: ${DB_USERNAME:user}
     password: ${DB_PASSWORD:pass}
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: 'ferasama@gmail.com'
+    password: 'nuup ibvo pppj ogqr'
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   liquibase:
     enabled: false
 
