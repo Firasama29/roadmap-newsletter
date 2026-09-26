@@ -1,6 +1,5 @@
 package com.roadmap.newsletter.model.subscriber;
 
-import com.roadmap.newsletter.model.SubscriptionObj;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,7 +15,7 @@ public class SubscriberRequest {
 
     private String email;
 
-    private List<SubscriptionObj> subscriptions;
+    private List<String> topics;
 
     private String category;
 }

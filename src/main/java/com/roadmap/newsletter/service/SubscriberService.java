@@ -1,8 +1,6 @@
 package com.roadmap.newsletter.service;
 
 import com.roadmap.newsletter.entity.Subscriber;
-import com.roadmap.newsletter.entity.Topic;
-import com.roadmap.newsletter.model.SubscriptionObj;
 import com.roadmap.newsletter.model.subscriber.SubscriberRequest;
 import com.roadmap.newsletter.model.subscriber.SubscriberResponse;
 import com.roadmap.newsletter.model.subscriber.UserSignupEvent;
@@ -23,7 +21,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,19 +33,6 @@ public class SubscriberService {
     private ApplicationEventPublisher publisher;
     private JavaMailSender mailSender;
 
-    public SubscriberResponse signup(SubscriberRequest subscriberRequest) {
-        // will add simple logic
-        Optional<Subscriber> subscriber = subscriberRepository.findByEmail(subscriberRequest.getEmail());
-        if (subscriber.isPresent()) {
-            throw new ServiceException("User already exists");
-        }
-        saveSubscriberDetails(subscriberRequest);
-        SubscriberResponse response = new SubscriberResponse();
-        response.setMessage("Signup successful");
-        publisher.publishEvent(new UserSignupEvent(subscriberRequest.getEmail()));
-        return response;
-    }
-
     @EventListener
     public void sendWelcomeEmail(UserSignupEvent event) throws MessagingException {
         MimeMessage message = mailSender.createMimeMessage();
@@ -59,54 +43,50 @@ public class SubscriberService {
         mailSender.send(message);
     }
 
-    public SubscriberResponse addNewTopic(SubscriberRequest subscriberRequest) {
-        Subscriber subscriber = subscriberRepository.findByEmail(subscriberRequest.getEmail()).orElseThrow(() -> new ServiceException("User does not exist"));
-
-        // subscriber can see topics
-        List<TopicData> topics = topicService.getTopics().getData();
+    public SubscriberResponse subscribe(SubscriberRequest subscriberRequest) {
+        // search for existing subscription
+        Subscriber subscriber = subscriberRepository.findByEmail(subscriberRequest.getEmail()).orElseGet(Subscriber::new);
+        // let user see topics
         List<TopicData> selectedTopics = new ArrayList<>();
-        topics.forEach(topic -> {
-            // select a topic and add to empty list
-            if (subscriberRequest.getSubscriptions().stream()
-              .anyMatch(sub -> StringUtils.equals(sub.getTopic(), topic.getName()))) {
+        topicService.getTopics().getData()
+          .forEach(topic -> {
+            // user selects a topic, which is added to empty list
+            if (Objects.nonNull(subscriberRequest.getTopics()) && subscriberRequest.getTopics().stream()
+              .anyMatch(t -> StringUtils.equals(t, topic.getName()))) {
                 selectedTopics.add(topic);
-                log.info("subscriber selected: {}", topic.getName());
+                log.info("topics: {}", topic.getName());
             }
-          });
+        });
         //TODO subscriber selects day and time
-        // get list of topic names
-        List<String> filteredTopics = !selectedTopics.isEmpty() ? selectedTopics.stream().map(TopicData::getName).toList() : new ArrayList<>();
-        //store subscriber details in subscriptions
-        if(Objects.isNull(subscriber.getTopics()) || subscriber.getTopics().isEmpty()) {
-            subscriber.setTopics(mapNewTopics(subscriberRequest.getSubscriptions()));
-        } else {
-            subscriber.getTopics().addAll(filteredTopics);
+        List<String> filteredTopics = !selectedTopics.isEmpty() ? selectedTopics.stream().map(TopicData::getName).collect(Collectors.toList()) : new ArrayList<>();
+        if (Objects.isNull(subscriberRequest.getTopics()) || subscriberRequest.getTopics().isEmpty()) {
+            throw new ServiceException("Please select at least one topic");
         }
-        subscriber.setStatus("SUBSCRIBED");
-        subscriberRepository.save(subscriber);
+        saveSubscriberDetails(subscriber, filteredTopics, subscriberRequest.getName(), subscriberRequest.getEmail(), subscriberRequest);
 
         SubscriberResponse response = new SubscriberResponse();
         response.setMessage("Subscription is ready.");
-        response.setTopics(filteredTopics);
+        response.setTopics(subscriber.getTopics());
 
-        //TODO set 'subscribed' email event here
+        //TODO set welcome email event here
         return response;
     }
 
-    private List<String> mapNewTopics(List<SubscriptionObj> subs) {
-        return subs.stream()
-          .map(SubscriptionObj::getTopic)
-          .toList();
-    }
-
-    private void saveSubscriberDetails(SubscriberRequest subscriberRequest) {
-        Subscriber subscriber = new Subscriber();
-        subscriber.setName(subscriberRequest.getName());
-        subscriber.setEmail(subscriberRequest.getEmail());
+    private void saveSubscriberDetails(Subscriber subscriber, List<String> filteredTopics, String name, String email, SubscriberRequest request) {
+        //TODO prevent duplicates
+        if (Objects.nonNull(subscriber.getTopics())) {
+            subscriber.getTopics().addAll(filteredTopics);
+        } else {
+            subscriber.setTopics(filteredTopics);
+        }
+        subscriber.setName(name);
+        subscriber.setEmail(email);
         subscriber.setStatus("NEW");
+        subscriber.setStatus("SUBSCRIBED");
         subscriberRepository.save(subscriber);
     }
 
+    //TODO is this imlementation correct?
     public SubscriberResponse deleteSubscriptionByTopic(String email, String topicString) {
         String[] topicArray = topicString.split(",");
         List<String> topics = List.of(topicArray);
