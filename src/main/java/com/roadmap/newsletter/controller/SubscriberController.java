@@ -22,18 +22,13 @@ public class SubscriberController {
 
     private SubscriberService subscriberService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<SubscriberResponse> postSignup(@Valid @RequestBody SubscriberRequest subscriberRequest) {
-        return ResponseEntity.status(OK).body(subscriberService.signup(subscriberRequest));
-    }
-
     @PostMapping
-    public ResponseEntity<SubscriberResponse> postSubscriber(@Valid @RequestBody SubscriberRequest subscriberRequest) {
-        return ResponseEntity.status(OK).body(subscriberService.addNewTopic(subscriberRequest));
+    public ResponseEntity<SubscriberResponse> postSubscribe(@Valid @RequestBody SubscriberRequest subscriberRequest) {
+        return ResponseEntity.status(OK).body(subscriberService.subscribe(subscriberRequest));
     }
 
     @DeleteMapping
-    public ResponseEntity<SubscriberResponse> postSubscriber(@RequestParam(name = "email") String email, @RequestParam(name = "topics") String topics) {
+    public ResponseEntity<SubscriberResponse> deleteSubscriber(@RequestParam(name = "email") String email, @RequestParam(name = "topics") String topics) {
         return ResponseEntity.status(OK).body(subscriberService.deleteSubscriptionByTopic(email, topics));
     }
 }
