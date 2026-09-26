@@ -32,6 +32,9 @@ public class Topic {
   @Column(name = "name")
   private String name;
 
+  @OneToMany(mappedBy = "topic", cascade = ALL)
+  private List<Subscription> subscriptions;
+
   @Column(name = "category")
   private String category;
 
